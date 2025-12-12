@@ -60,6 +60,7 @@ curl http://YOUR-ALB-DNS-HERE/health
 ```
 
 **That's it! Your Tic-Tac-Toe app is live.** ✅
+![App Image](https://github.com/user-attachments/assets/1aa1a986-c7e2-4dea-ab85-1eeedfcc694d)
 
 ---
 
@@ -450,3 +451,4 @@ aws logs tail /ecs/app-staging-task --follow
 
 *Last Updated: December 2025*
 ```
+
