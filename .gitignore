@@ -1,0 +1,71 @@
+# Local environment files
+.env
+.env.local
+.env.*.local
+terraform.tfvars
+terraform.tfvars.json
+crash.log
+crash.*.log
+.terraform/
+.terraform.lock.hcl
+tfplan*
+tfstate*
+*.tfstate
+*.tfstate.*
+
+# AWS credentials and secrets
+~/.aws/
+.aws/
+aws_credentials
+aws_access_key_id
+aws_secret_access_key
+
+# Sensitive files
+**/secrets.json
+**/passwords.txt
+**/credentials.json
+secrets-policy.json
+ecr-logs-policy.json
+*.pem
+*.key
+*.pub
+
+# Node modules and dependencies
+node_modules/
+vendor/
+.venv/
+venv/
+env/
+ENV/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Logs
+logs/
+*.log
+
+# Coverage
+.coverage
+htmlcov/
+
+

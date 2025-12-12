@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .cell {
+            transition: all 0.3s ease;
+        }
+        .cell:hover {
+            background-color: #e5e7eb;
+        }
+        .disabled {
+            pointer-events: none;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <!-- Players Modal -->
+    <div id="playersModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-8 rounded-lg shadow-lg text-center w-96">
+            <h1 class="text-3xl font-bold mb-6 text-gray-800">Tic Tac Toe</h1>
+            <p class="text-lg mb-6 text-gray-600">Enter player names to start playing:</p>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Player 1 Name:</label>
+                <input id="player1Input" type="text" placeholder="Enter Player 1 name" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500">
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Player 2 Name:</label>
+                <input id="player2Input" type="text" placeholder="Enter Player 2 name" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500">
+            </div>
+            
+            <button id="startGameBtn" class="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Start Game</button>
+        </div>
+    </div>
+
+    <!-- Game Container -->
+    <div id="gameContainer" class="bg-white p-6 rounded-lg shadow-lg text-center hidden">
+        <h1 class="text-3xl font-bold mb-4 text-gray-800">Tic Tac Toe</h1>
+        <div class="mb-4 text-sm text-gray-600">
+            <p id="player1Info" class="mb-1"></p>
+            <p id="player2Info" class="mb-2"></p>
+        </div>
+        <div id="status" class="text-lg mb-4 text-gray-600 font-bold">Player's Turn</div>
+        <div class="grid grid-cols-3 gap-2 w-64 mx-auto">
+            <div class="cell bg-gray-200 h-20 flex items-center justify-center text-2xl font-bold cursor-pointer" onclick="makeMove(0)"></div>
+            <div class="cell bg-gray-200 h-20 flex items-center justify-center text-2xl font-bold cursor-pointer" onclick="makeMove(1)"></div>
+            <div class="cell bg-gray-200 h-20 flex items-center justify-center text-2xl font-bold cursor-pointer" onclick="makeMove(2)"></div>
+            <div class="cell bg-gray-200 h-20 flex items-center justify-center text-2xl font-bold cursor-pointer" onclick="makeMove(3)"></div>
+            <div class="cell bg-gray-200 h-20 flex items-center justify-center text-2xl font-bold cursor-pointer" onclick="makeMove(4)"></div>
+            <div class="cell bg-gray-200 h-20 flex items-center justify-center text-2xl font-bold cursor-pointer" onclick="makeMove(5)"></div>
+            <div class="cell bg-gray-200 h-20 flex items-center justify-center text-2xl font-bold cursor-pointer" onclick="makeMove(6)"></div>
+            <div class="cell bg-gray-200 h-20 flex items-center justify-center text-2xl font-bold cursor-pointer" onclick="makeMove(7)"></div>
+            <div class="cell bg-gray-200 h-20 flex items-center justify-center text-2xl font-bold cursor-pointer" onclick="makeMove(8)"></div>
+        </div>
+        <button id="reset" class="mt-6 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Reset Game</button>
+    </div>
+
+    <script>
+        let players = {};
+        let currentPlayer = 'X';
+        let gameState = {
+            board: ["", "", "", "", "", "", "", "", ""],
+            current_player: "X",
+            winner: null,
+            game_over: false
+        };
+
+        // Handle game start
+        document.getElementById('startGameBtn').addEventListener('click', startGame);
+        document.getElementById('player1Input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') document.getElementById('player2Input').focus();
+        });
+        document.getElementById('player2Input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') startGame();
+        });
+
+        function startGame() {
+            const player1Name = document.getElementById('player1Input').value.trim();
+            const player2Name = document.getElementById('player2Input').value.trim();
+            
+            if (!player1Name || !player2Name) {
+                alert('Please enter both player names');
+                return;
+            }
+
+            if (player1Name === player2Name) {
+                alert('Player names must be different');
+                return;
+            }
+
+            // Randomly assign X or O to players
+            const symbols = ['X', 'O'];
+            const randomIndex = Math.floor(Math.random() * 2);
+            const player1Symbol = symbols[randomIndex];
+            const player2Symbol = symbols[1 - randomIndex];
+
+            players = {
+                [player1Symbol]: player1Name,
+                [player2Symbol]: player2Name
+            };
+
+            currentPlayer = 'X';
+            
+            // Initialize game on backend
+            fetch('/init', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            }).then(response => response.json()).then(data => {
+                // Reset local game state
+                gameState = {
+                    board: data.board,
+                    current_player: data.current_player,
+                    winner: data.winner,
+                    game_over: data.game_over
+                };
+
+                // Hide modal and show game
+                document.getElementById('playersModal').classList.add('hidden');
+                document.getElementById('gameContainer').classList.remove('hidden');
+                
+                // Display player info
+                document.getElementById('player1Info').textContent = `${player1Name} is ${player1Symbol}`;
+                document.getElementById('player2Info').textContent = `${player2Name} is ${player2Symbol}`;
+                
+                // Initialize board display
+                const cells = document.querySelectorAll('.cell');
+                cells.forEach(cell => {
+                    cell.textContent = '';
+                    cell.classList.remove('text-blue-600', 'text-red-600', 'disabled');
+                });
+                
+                updateStatusDisplay();
+            });
+        }
+
+        function updateStatusDisplay() {
+            const currentPlayerName = players[currentPlayer];
+            const status = document.getElementById('status');
+            status.textContent = `${currentPlayerName}'s Turn (${currentPlayer})`;
+        }
+
+        async function makeMove(index) {
+            // Check if cell is already filled
+            if (gameState.board[index] !== "") {
+                alert('Cell already occupied!');
+                return;
+            }
+            
+            // Check if game is over
+            if (gameState.game_over) {
+                alert('Game is over! Click Reset to play again.');
+                return;
+            }
+
+            const response = await fetch('/move', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ index })
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                updateBoard(data);
+            } else {
+                alert(data.error);
+            }
+        }
+
+        async function resetGame() {
+            const response = await fetch('/reset', {
+                method: 'POST'
+            });
+            const data = await response.json();
+            
+            // Reset local game state
+            gameState = {
+                board: data.board,
+                current_player: data.current_player,
+                winner: data.winner,
+                game_over: data.game_over
+            };
+            
+            updateBoard(data);
+        }
+
+        function updateBoard(data) {
+            // Update local game state
+            gameState = {
+                board: data.board,
+                current_player: data.current_player,
+                winner: data.winner,
+                game_over: data.game_over
+            };
+            
+            const cells = document.querySelectorAll('.cell');
+            cells.forEach((cell, i) => {
+                // Clear previous styles and content
+                cell.textContent = data.board[i];
+                cell.classList.remove('text-blue-600', 'text-red-600', 'disabled');
+                
+                // Apply new styles based on board content
+                if (data.board[i] === 'X') {
+                    cell.classList.add('text-blue-600');
+                } else if (data.board[i] === 'O') {
+                    cell.classList.add('text-red-600');
+                }
+            });
+
+            const status = document.getElementById('status');
+            if (data.winner) {
+                cells.forEach(cell => cell.classList.add('disabled'));
+                if (data.winner === 'Draw') {
+                    status.textContent = "It's a Draw!";
+                } else {
+                    const winnerName = players[data.winner];
+                    status.textContent = `${winnerName} (${data.winner}) Wins!`;
+                }
+            } else {
+                currentPlayer = data.current_player;
+                updateStatusDisplay();
+            }
+        }
+
+        document.getElementById('reset').addEventListener('click', resetGame);
+    </script>
+</body>
+</html>
