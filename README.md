@@ -217,7 +217,8 @@ Before starting, verify you have:
 
 ## 🏗️ ARCHITECTURE OVERVIEW
 
-![AWS Architecture Diagram - Tic-Tac-Toe Deployment](./Daigram.jpg)
+![Daigram](https://github.com/user-attachments/assets/3923f3e6-a1ce-4302-8365-816fb0f77b07)
+
 
 ### Network Architecture:
 ```
